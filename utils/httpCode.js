@@ -1,0 +1,18 @@
+/**
+ *
+ * @type {{INTERNAL_SERVER_ERROR: number,ACCESS_DENIED: number, UNAUTHORIZED: number, BAD_REQUEST: number,
+ * OK: number,NOT_FOUND: number, CREATED: number,CONTINUE:number, NO_CONTENT: number, UNPROCESSABLE_ENTITY: number}}
+ */
+ 
+module.exports = {
+  OK: 200,
+  CREATED: 201,
+  NO_CONTENT: 204,
+  CONTINUE: 202,
+  INTERNAL_SERVER_ERROR: 500,
+  BAD_REQUEST: 400,
+  UNAUTHORIZED: 401,
+  ACCESS_DENIED: 403,
+  UNPROCESSABLE_ENTITY: 422,
+  NOT_FOUND: 404,
+};
