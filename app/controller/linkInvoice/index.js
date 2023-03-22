@@ -1,4 +1,4 @@
-const bankController = require("./linkInvoiceController");
+const InvoiceLinkController = require("./linkInvoiceController");
 const { Success, Created } = require("../../../utils/response/success/successes");
 const {
   InternalServerError,
@@ -7,7 +7,7 @@ const {
 } = require("../../../utils/response/error/errors");
 module.exports.getAllLinkInvoice = async (req, res, next) => {
   try {
-    const { message, data, code } = await bankController.getAllLinkInvoice({
+    const { message, data, code } = await InvoiceLinkController.getAllLinkInvoice({
       ...req.body,
     });
 
@@ -25,7 +25,7 @@ module.exports.getAllLinkInvoice = async (req, res, next) => {
 
 module.exports.addLinkInvoice = async (req, res, next) => {
   try {
-    const { message, data, code } = await bankController.addLinkInvoice({
+    const { message, data, code } = await InvoiceLinkController.addLinkInvoice({
       ...req.body,
       userId:req.user._id
     });
@@ -45,7 +45,7 @@ module.exports.editLinkInvoice = async (req, res, next) => {
   try {
     let userId = req.user._id
 
-    const { message, data, code } = await bankController.editLinkInvoice({
+    const { message, data, code } = await InvoiceLinkController.editLinkInvoice({
       ...req.params,
       ...userId      
     });
@@ -65,7 +65,7 @@ module.exports.deleteLinkInvoice = async (req, res, next) => {
   try {
     let userId = req.user._id
 
-    const { message, data, code } = await bankController.deleteLinkInvoice({
+    const { message, data, code } = await InvoiceLinkController.deleteLinkInvoice({
       ...req.params,
       ...userId
         });
@@ -80,3 +80,23 @@ module.exports.deleteLinkInvoice = async (req, res, next) => {
     return next(new InternalServerError(req));
   }
 };
+
+
+module.exports.checkAdminRole = async (req, res, next) => {
+  try {
+    const { message, data, code } = await InvoiceLinkController.checkAdminRole({
+      ...req.body,
+      ...req.params
+    });
+
+    if (code === 0) {
+      return next(new Success(message, data));
+    }
+
+    return next(new BadRequest(message));
+  } catch (err) {
+    console.log(err);
+    return next(new InternalServerError(req));
+  }
+};
+

@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { Request } = require("../Model");
 
 const linkInvoice = new mongoose.Schema({
   userId: {
@@ -6,33 +7,57 @@ const linkInvoice = new mongoose.Schema({
     ref: "User",
     required: true,
   },
-  Currency:{
-    type : String,
+  Currency: {
+    type: String,
     default: "USD",
   },
-  jobDetails: [{
-    title: {
-      type: String,
-      required: true,
+  jobDetails: [
+    {
+      title: {
+        type: String,
+      },
+      Amount: {
+        type: Number,
+      },
+      Description: {
+        type: String,
+        required: true,
+      },
     },
-    Amount: {
-      type: Number,
-      required: true,
-    },
-    Description: {
-      type: String,
-      required: true,
-    },
-}],
-status:{
-  type: String,
-  enum:["pending verification" , "pending approval" , "active" , "rejected" , "inactive" , "archived"],
-  default: "pending approval"
-},
+  ],
+  status: {
+    type: String,
+    enum: [
+      "pending verification",
+      "pending approval",
+      "active",
+      "rejected",
+      "inactive",
+      "archived",
+    ],
+    default: "pending approval",
+  },
   isDeleted: {
     type: Boolean,
     default: "false",
   },
 });
+
+linkInvoice.post("save", async function (doc, next) {
+  try {
+    if (doc.status !== "pending verification") {
+      await Request.create({
+        userId,
+        requestType: "Create Invoice Link",
+        linkInvoiceId: doc._id,
+      });
+    }
+    next();
+  } catch (err) {
+    next(err);
+  }
+});
+
 const Link_Invoice = mongoose.model("linkInvoice", linkInvoice);
+
 module.exports = Link_Invoice;

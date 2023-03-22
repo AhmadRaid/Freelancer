@@ -1,35 +1,50 @@
-const { linkInvoice } = require("../../Model");
+const { linkInvoice, verification_user, Request } = require("../../Model");
 
 module.exports.getAllLinkInvoice = async (userId) => {
   try {
-    let Link_Invoice = await linkInvoice.find({});
+    let Link_Invoice = await linkInvoice.find({ isDeleted: false });
     if (!Link_Invoice) {
       return { code: 1, message: "We dont have Bank", data: null };
     }
-    return { code: 0, message: "commonSuccess.message", data: { Link_Invoice } };
+    return {
+      code: 0,
+      message: "commonSuccess.message",
+      data: { Link_Invoice },
+    };
   } catch (error) {
     console.log(error);
     throw new Error(error);
   }
 };
 
-
 module.exports.addLinkInvoice = async (data) => {
-  const {
-    userId,
-    currency,
-    jobDetails,
-  } = data;
+  const { userId, currency, jobDetails, status } = data;
 
   try {
+    let verificationUser = verification_user.findOne({ userId });
+
+    if (verificationUser.AcceptVerificationID == "False") {
+      status = "pending verification";
+    }
 
     const Link_Invoice = await linkInvoice.create({
-        userId,
-        currency,
-        jobDetails,
+      userId,
+      currency,
+      jobDetails,
+      status,
     });
 
-    return { code: 0, message: "commonSuccess.message", data: { Link_Invoice } };
+    const request = await Request.create({
+      userId,
+      requestType: "Create Invoice Link",
+      linkInvoiceId: Link_Invoice._id,
+    });
+
+    return {
+      code: 0,
+      message: "commonSuccess.message",
+      data: { Link_Invoice },
+    };
   } catch (error) {
     console.log(error);
     throw new Error(error);
@@ -37,23 +52,30 @@ module.exports.addLinkInvoice = async (data) => {
 };
 
 module.exports.editLinkInvoice = async (data) => {
-  const { locationBank, nameAccount, branch, accountNumber, Currency, ledger , bankId , userId } =
-    data;
+  const {
+    locationBank,
+    nameAccount,
+    branch,
+    accountNumber,
+    Currency,
+    ledger,
+    bankId,
+    userId,
+  } = data;
   try {
-
     let verificationExist = await verification_code.findOne({
       userId,
       verificationCode: code,
       phone,
     });
-  
+
     if (!verificationExist) {
       return { code: 1, message: "Error validation message" };
     }
 
-    
     const bank = await Bank.findOne({
-      _id : bankId , userId
+      _id: bankId,
+      userId,
     });
 
     if (!bank) {
@@ -77,11 +99,11 @@ module.exports.editLinkInvoice = async (data) => {
 };
 
 module.exports.deleteLinkInvoice = async (data) => {
-  const { bankId , userId } =
-    data;
+  const { bankId, userId } = data;
   try {
     const bank = await Bank.findOne({
-   _id:bankId , userId 
+      _id: bankId,
+      userId,
     });
 
     if (!bank) {
@@ -89,9 +111,30 @@ module.exports.deleteLinkInvoice = async (data) => {
     }
 
     bank.deleteOne({
-      _id:bankId , userId 
-
+      _id: bankId,
+      userId,
     });
+
+    return { code: 0, message: "commonSuccess.message", data: bank };
+  } catch (error) {
+    console.log(error);
+    throw new Error(error);
+  }
+};
+
+module.exports.checkAdminRole = async (data) => {
+  const { status , invoiceLinkId } = data;
+  try {
+    const Invoice_Link = await linkInvoice.findOne({
+      _id: invoiceLinkId
+    });
+
+    if (!Invoice_Link) {
+      return { code: 1, message: "category.notFoundBank", data: null };
+    }
+
+    Invoice_Link.status = status;
+    await Invoice_Link.save();
 
     return { code: 0, message: "commonSuccess.message", data: bank };
   } catch (error) {
