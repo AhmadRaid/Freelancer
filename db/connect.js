@@ -8,7 +8,7 @@ const connectionParams = {
 
 mongoose.set('strictQuery', false);
 
-console.log(process.env.DB_CONNECTION);
+// console.log(process.env.DB_CONNECTION);
 
 const connectDB = async () => {
   await mongoose
