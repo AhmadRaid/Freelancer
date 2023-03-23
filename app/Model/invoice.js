@@ -5,12 +5,12 @@ const invoiceSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
     },
-    client: {
-      name: { type: String },
-      email: { type: String },
-      currency: { type: String, default: 'USD' },
-      country: String,
-    },
+
+    name: { type: String },
+    email: { type: String },
+    currency: { type: String, default: 'USD' },
+    country: String,
+
     services: [
       {
         title: {
