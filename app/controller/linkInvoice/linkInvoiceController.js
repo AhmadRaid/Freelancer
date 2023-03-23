@@ -105,7 +105,7 @@ module.exports.deleteLinkInvoice = async (data) => {
 };
 
 module.exports.payLinkInvoice = async (data) => {
-  const { invoiceLinkId } = data;
+  const { invoiceLinkId , userId} = data;
   try {
     const invoiceLink = await linkInvoice.findOne({
       _id: invoiceLinkId,
@@ -119,12 +119,13 @@ module.exports.payLinkInvoice = async (data) => {
     }
 
     if (invoiceLink.status == "active") {
-      const Invoice = await Invoice.create({
+      const invoice = await Invoice.create({
+        freelancerId : userId,
         invoiceLinkId,
       });
-      return { code: 0, message: "commonSuccess.message", data: Invoice };
+      return { code: 0, message: "commonSuccess.message", data: invoice };
     }
-    return { code: 1, message: "commonSuccess.message", data: Invoice };
+    return { code: 1, message: "commonSuccess.message", data: null };
   } catch (error) {
     console.log(error);
     throw new Error(error);

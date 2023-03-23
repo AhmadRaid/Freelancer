@@ -104,7 +104,7 @@ module.exports.checkAdminRole = async (req, res, next) => {
 module.exports.payLinkInvoice = async (req, res, next) => {
   try {
     const { message, data, code } = await InvoiceLinkController.payLinkInvoice({
-      ...req.body,
+      ...req.user._id,
       ...req.params
     });
 
