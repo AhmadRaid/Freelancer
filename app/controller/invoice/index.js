@@ -2,12 +2,18 @@ const {
   InternalServerError,
   BadRequest,
 } = require('../../../utils/response/error/errors');
-const { Success } = require('../../../utils/response/success/successes');
+const {
+  Success,
+  Created,
+} = require('../../../utils/response/success/successes');
 const service = require('./service');
 
 module.exports.getListing = async (req, res, next) => {
   try {
-    const { code, message, data } = await service.getListing();
+    const { code, message, data } = await service.getListing(
+      req.query,
+      req.user._id
+    );
     if (code === 0) {
       return next(new Success(message, data));
     }
@@ -18,7 +24,10 @@ module.exports.getListing = async (req, res, next) => {
 };
 module.exports.getDetails = async (req, res, next) => {
   try {
-    const { code, message, data } = await service.getDetails();
+    const { code, message, data } = await service.getDetails(
+      req.params.id,
+      req.user._id
+    );
     if (code === 0) {
       return next(new Success(message, data));
     }
@@ -29,9 +38,12 @@ module.exports.getDetails = async (req, res, next) => {
 };
 module.exports.addInvoice = async (req, res, next) => {
   try {
-    const { code, message, data } = await service.addInvoice();
+    const { code, message, data } = await service.addInvoice(
+      req.body,
+      req.user._id
+    );
     if (code === 0) {
-      return next(new Success(message, data));
+      return next(new Created(message, data));
     }
     return next(new BadRequest(message));
   } catch (error) {
@@ -40,7 +52,7 @@ module.exports.addInvoice = async (req, res, next) => {
 };
 module.exports.edit = async (req, res, next) => {
   try {
-    const { code, message, data } = await service.edit();
+    const { code, message, data } = await service.edit(req.body, req.user._id);
     if (code === 0) {
       return next(new Success(message, data));
     }
@@ -51,7 +63,11 @@ module.exports.edit = async (req, res, next) => {
 };
 module.exports.cancel = async (req, res, next) => {
   try {
-    const { code, message, data } = await service.cancel();
+    const { code, message, data } = await service.cancel(
+      req.params.id,
+      req.user._id
+    );
+
     if (code === 0) {
       return next(new Success(message, data));
     }

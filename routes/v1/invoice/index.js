@@ -2,12 +2,12 @@ const express = require('express');
 const isAuth = require('../../../middleware/isAuth');
 const router = express.Router();
 const controller = require('../../../app/controller/invoice');
-router.use(isAuth);
-router.use(); //need
+const verifyIdentify = require('../../../middleware/verifyIdentify');
 
-// [validationSchema , validateRequest] need to be add from my code out;
+router.use(isAuth);
 
 router.get('/', controller.getListing);
+
 router.get('/:id', controller.getDetails);
 
 router.post('/', controller.addInvoice);

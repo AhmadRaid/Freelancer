@@ -13,9 +13,18 @@ const invoiceSchema = new mongoose.Schema(
     },
     services: [
       {
-        title: String,
-        price: Number,
-        details: String,
+        title: {
+          type: String,
+          required: true,
+        },
+        price: {
+          type: Number,
+          required: true,
+        },
+        description: {
+          type: String,
+          required: true,
+        },
       },
     ],
     fees: Number,
@@ -25,15 +34,17 @@ const invoiceSchema = new mongoose.Schema(
     status: {
       type: String,
       enum: [
-        'paid',
+        'pending verification',
+        'pending approval',
         'sent',
-        'pending',
+        'rejected',
+        'unpaid',
+        'paid',
         'pending payment',
-        'canceled',
-        'disapproved',
         'refunded',
+        'archived',
       ],
-      default: 'pending',
+      default: 'pending approval',
     },
 
     isDeleted: {
@@ -43,3 +54,5 @@ const invoiceSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+module.exports = mongoose.model('invoice', invoiceSchema);

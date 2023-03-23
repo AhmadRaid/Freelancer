@@ -7,3 +7,4 @@ module.exports.Recipient = require('./recipients');
 module.exports.Office = require('./office');
 module.exports.Request = require('./request');
 module.exports.linkInvoice = require('./link_invoice');
+module.exports.Invoice = require('./invoice');
