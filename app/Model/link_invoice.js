@@ -7,10 +7,17 @@ const linkInvoice = new mongoose.Schema({
     ref: "User",
     required: true,
   },
+
+  invoiceId:{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Invoice",
+  },
+
   Currency: {
     type: String,
     default: "USD",
   },
+
   jobDetails: [
     {
       title: {
@@ -25,6 +32,7 @@ const linkInvoice = new mongoose.Schema({
       },
     },
   ],
+
   status: {
     type: String,
     enum: [
@@ -37,6 +45,19 @@ const linkInvoice = new mongoose.Schema({
     ],
     default: "pending approval",
   },
+
+  link: {
+    type: String,
+    required: true,
+  },
+
+  disapprovalReason: {
+    type: String,
+    required: function () {
+      return this.status == "rejected";
+    },
+  },
+
   isDeleted: {
     type: Boolean,
     default: "false",

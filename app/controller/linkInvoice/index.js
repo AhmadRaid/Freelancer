@@ -100,3 +100,41 @@ module.exports.checkAdminRole = async (req, res, next) => {
   }
 };
 
+
+module.exports.payLinkInvoice = async (req, res, next) => {
+  try {
+    const { message, data, code } = await InvoiceLinkController.payLinkInvoice({
+      ...req.body,
+      ...req.params
+    });
+
+    if (code === 0) {
+      return next(new Success(message, data));
+    }
+
+    return next(new BadRequest(message));
+  } catch (err) {
+    console.log(err);
+    return next(new InternalServerError(req));
+  }
+};
+
+
+module.exports.change_status = async (req, res, next) => {
+  try {
+    const { message, data, code } = await InvoiceLinkController.change_status({
+      ...req.body,
+      ...req.params
+    });
+
+    if (code === 0) {
+      return next(new Success(message, data));
+    }
+
+    return next(new BadRequest(message));
+  } catch (err) {
+    console.log(err);
+    return next(new InternalServerError(req));
+  }
+};
+

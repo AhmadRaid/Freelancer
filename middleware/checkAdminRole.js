@@ -6,7 +6,7 @@ const {
 async function checkAdminRole(req, res, next) {
   let user = User.findOne({ _id: req.user._id });
   if (!user) {
-    return next(new Unauthorized("Sorry , This not you permission"));
+    return next(new Unauthorized("Sorry , This user not exist"));
   }
 
   if (user.role == "Admin_Team") {

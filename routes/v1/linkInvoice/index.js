@@ -8,18 +8,27 @@ const verifyIdentify = require("../../../middleware/verifyIdentify");
 
 const checkAdminRole = require("../../../middleware/checkAdminRole");
 
+const checkClientRole = require("../../../middleware/checkClientRole");
+
+
 const router = express.Router();
 
 router.use(isAuth);
 
 router.get("/listing", controller.getAllLinkInvoice);
 
-router.post("/add", verifyIdentify ,controller.addLinkInvoice);
+router.post("/add" ,controller.addLinkInvoice);
 
-router.post("/change_status/:invoiceLinkId", checkAdminRole ,controller.checkAdminRole);
+router.put("/edit/:invoiceLinkId", controller.editLinkInvoice);
 
-router.put("/edit/:linkInvoice", controller.editLinkInvoice);
+router.delete("/delete/:invoiceLinkId", controller.deleteLinkInvoice);
 
-router.delete("/delete/:linkInvoice", controller.deleteLinkInvoice);
+router.put("/Admin_Team_change_status/:invoiceLinkId", checkAdminRole ,controller.change_status);
+
+router.put("/Client_change_status/:invoiceLinkId", checkClientRole , controller.payLinkInvoice);
+
+router.post("/payLinkInvoice/:invoiceLinkId", controller.payLinkInvoice);
+
+
 
 module.exports = router;

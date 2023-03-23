@@ -34,12 +34,6 @@ module.exports.addLinkInvoice = async (data) => {
       status,
     });
 
-    const request = await Request.create({
-      userId,
-      requestType: "Create Invoice Link",
-      linkInvoiceId: Link_Invoice._id,
-    });
-
     return {
       code: 0,
       message: "commonSuccess.message",
@@ -52,44 +46,32 @@ module.exports.addLinkInvoice = async (data) => {
 };
 
 module.exports.editLinkInvoice = async (data) => {
-  const {
-    locationBank,
-    nameAccount,
-    branch,
-    accountNumber,
-    Currency,
-    ledger,
-    bankId,
-    userId,
-  } = data;
+  const { userId, invoiceLinkId, currency, jobDetails, status } = data;
+
   try {
-    let verificationExist = await verification_code.findOne({
-      userId,
-      verificationCode: code,
-      phone,
-    });
-
-    if (!verificationExist) {
-      return { code: 1, message: "Error validation message" };
-    }
-
-    const bank = await Bank.findOne({
-      _id: bankId,
+    const Invoice_Link = await invoiceLink.findOne({
+      _id: invoiceLinkId,
       userId,
     });
 
-    if (!bank) {
+    if (!Invoice_Link) {
       return { code: 1, message: "category.notFoundBank", data: null };
     }
 
-    bank.locationBank = locationBank;
-    bank.nameAccount = nameAccount;
-    bank.branch = branch;
-    bank.accountNumber = accountNumber;
-    bank.Currency = Currency;
-    bank.ledger = ledger;
+    if (Invoice_Link.status == "archived") {
+      return {
+        code: 1,
+        message:
+          "You cant change  because this invoice link status is archived",
+        data: null,
+      };
+    }
 
-    await bank.save();
+    bank.currency = locationBank;
+    bank.jobDetails = nameAccount;
+    bank.status = branch;
+
+    await Invoice_Link.save();
 
     return { code: 0, message: "commonSuccess.message", data: bank };
   } catch (error) {
@@ -122,21 +104,27 @@ module.exports.deleteLinkInvoice = async (data) => {
   }
 };
 
-module.exports.checkAdminRole = async (data) => {
-  const { status , invoiceLinkId } = data;
+module.exports.payLinkInvoice = async (data) => {
+  const { invoiceLinkId } = data;
   try {
-    const Invoice_Link = await linkInvoice.findOne({
-      _id: invoiceLinkId
+    const invoiceLink = await linkInvoice.findOne({
+      _id: invoiceLinkId,
     });
-
-    if (!Invoice_Link) {
-      return { code: 1, message: "category.notFoundBank", data: null };
+    if (!invoiceLink) {
+      return {
+        code: 1,
+        message: "invoiceLink.notFoundInvoiceLink",
+        data: null,
+      };
     }
 
-    Invoice_Link.status = status;
-    await Invoice_Link.save();
-
-    return { code: 0, message: "commonSuccess.message", data: bank };
+    if (invoiceLink.status == "active") {
+      const Invoice = await Invoice.create({
+        invoiceLinkId,
+      });
+      return { code: 0, message: "commonSuccess.message", data: Invoice };
+    }
+    return { code: 1, message: "commonSuccess.message", data: Invoice };
   } catch (error) {
     console.log(error);
     throw new Error(error);
