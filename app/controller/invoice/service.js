@@ -60,9 +60,36 @@ module.exports.getDetails = async (invoiceId, freelancerId) => {
     throw new Error(error);
   }
 };
-module.exports.delete = async (date, freelancerId) => {
+module.exports.delete = async (invoiceId, freelancerId) => {
   try {
-    const {} = data;
+    const cancelableStatus = [
+      'pending verification',
+      'pending approval',
+      'sent',
+    ];
+
+    const invoice = await Invoice.findOne({
+      freelancerId,
+      _id: invoiceId,
+      isDeleted: false,
+    });
+
+    if (!invoice) {
+      return { code: 1, message: "invoice doesn't exist", data: null };
+    }
+
+    if (invoice.status === 'canceled') {
+      invoice.status = 'archived';
+      invoice.isDeleted = true;
+      await invoice.save();
+      return { code: 0, message: 'invoice deleted', data: null };
+    }
+    if (cancelableStatus.includes(invoice.status)) {
+      invoice.status = 'canceled';
+      await invoice.save();
+      return { code: 0, message: 'invoice canceled', data: null };
+    }
+    return { code: 2, message: "invoice can't be canceled or deleted" };
   } catch (error) {
     console.log(error);
     throw new Error(error);

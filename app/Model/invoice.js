@@ -44,6 +44,7 @@ const invoiceSchema = new mongoose.Schema(
         'pending payment',
         'refunded',
         'archived',
+        'canceled',
       ],
       default: 'pending approval',
     },
