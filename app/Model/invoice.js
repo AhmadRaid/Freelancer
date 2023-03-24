@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const Request = require('./request');
 const invoiceSchema = new mongoose.Schema(
   {
     freelancerId: {
@@ -55,4 +56,14 @@ const invoiceSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// TODO:add hook to add request after save
+invoiceSchema.post('save', async (invoice) => {
+  if (invoice.status !== 'pending verification') {
+    await Request.create({
+      userId: invoice.freelancerId,
+      invoiceId: invoice._id,
+      requestType: 'approve invoice',
+    });
+  }
+});
 module.exports = mongoose.model('invoice', invoiceSchema);

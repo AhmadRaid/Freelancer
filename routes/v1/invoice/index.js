@@ -9,7 +9,7 @@ router.use(isAuth);
 router.get('/', controller.getListing);
 
 router.get('/:id', controller.getDetails);
-
+// TODO: add validation for what's coming in
 router.post('/', controller.addInvoice);
 
 router.put('/:id', controller.edit);
