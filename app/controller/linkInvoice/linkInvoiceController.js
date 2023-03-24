@@ -2,9 +2,12 @@ const { linkInvoice, verification_user, Request } = require("../../Model");
 
 module.exports.getAllLinkInvoice = async (userId) => {
   try {
-    let Link_Invoice = await linkInvoice.find({ isDeleted: false });
+    let Link_Invoice = await linkInvoice.find({
+      status: { $ne: "archived" },
+      userId,
+    });
     if (!Link_Invoice) {
-      return { code: 1, message: "We dont have Bank", data: null };
+      return { code: 1, message: "We dont have Link Invoice", data: null };
     }
     return {
       code: 0,
@@ -18,12 +21,20 @@ module.exports.getAllLinkInvoice = async (userId) => {
 };
 
 module.exports.addLinkInvoice = async (data) => {
-  const { userId, currency, jobDetails, status } = data;
+  let { userId, currency, jobDetails, status, link } = data;
 
   try {
-    let verificationUser = verification_user.findOne({ userId });
+    let verificationUser = await verification_user.findOne({ userId });
 
-    if (verificationUser.AcceptVerificationID == "False") {
+    if (!verificationUser) {
+      return {
+        code: 1,
+        message: "verificationUser.not found",
+        data: { Link_Invoice },
+      };
+    }
+
+    if (verificationUser.AcceptVerificationID == false) {
       status = "pending verification";
     }
 
@@ -32,6 +43,7 @@ module.exports.addLinkInvoice = async (data) => {
       currency,
       jobDetails,
       status,
+      link,
     });
 
     return {
@@ -81,23 +93,32 @@ module.exports.editLinkInvoice = async (data) => {
 };
 
 module.exports.deleteLinkInvoice = async (data) => {
-  const { bankId, userId } = data;
+  const { status, invoiceLinkId, disapprovalReason } = data;
   try {
-    const bank = await Bank.findOne({
-      _id: bankId,
-      userId,
+    const Invoice_Link = await linkInvoice.findOne({
+      _id: invoiceLinkId,
     });
 
-    if (!bank) {
-      return { code: 1, message: "Bank.notFoundBank", data: null };
+    if (!Invoice_Link) {
+      return {
+        code: 1,
+        message: "invoiceLink.notFoundInvoiceLink",
+        data: null,
+      };
     }
 
-    bank.deleteOne({
-      _id: bankId,
-      userId,
-    });
+    Invoice_Link.status = "archived";
 
-    return { code: 0, message: "commonSuccess.message", data: bank };
+    if (disapprovalReason) {
+      Invoice_Link.disapprovalReason = disapprovalReason;
+    }
+    await Invoice_Link.save();
+
+    return {
+      code: 0,
+      message: "commonSuccess.message",
+      data: { Invoice_Link },
+    };
   } catch (error) {
     console.log(error);
     throw new Error(error);
@@ -105,7 +126,7 @@ module.exports.deleteLinkInvoice = async (data) => {
 };
 
 module.exports.payLinkInvoice = async (data) => {
-  const { invoiceLinkId , userId} = data;
+  const { invoiceLinkId, userId } = data;
   try {
     const invoiceLink = await linkInvoice.findOne({
       _id: invoiceLinkId,
@@ -120,11 +141,68 @@ module.exports.payLinkInvoice = async (data) => {
 
     if (invoiceLink.status == "active") {
       const invoice = await Invoice.create({
-        freelancerId : userId,
+        freelancerId: userId,
         invoiceLinkId,
       });
       return { code: 0, message: "commonSuccess.message", data: invoice };
     }
+    return { code: 1, message: "commonSuccess.message", data: null };
+  } catch (error) {
+    console.log(error);
+    throw new Error(error);
+  }
+};
+
+module.exports.Admin_change_status = async (data) => {
+  const { status, invoiceLinkId, disapprovalReason } = data;
+  console.log(invoiceLinkId);
+  try {
+    const Invoice_Link = await linkInvoice.findOne({
+      _id: invoiceLinkId,
+    });
+
+    if (!Invoice_Link) {
+      return {
+        code: 1,
+        message: "invoiceLink.notFoundInvoiceLink",
+        data: null,
+      };
+    }
+
+    Invoice_Link.status = status;
+
+    if (disapprovalReason) {
+      Invoice_Link.disapprovalReason = disapprovalReason;
+    }
+    await Invoice_Link.save();
+
+    return {
+      code: 0,
+      message: "commonSuccess.message",
+      data: { Invoice_Link },
+    };
+  } catch (error) {
+    console.log(error);
+    throw new Error(error);
+  }
+};
+
+module.exports.Client_change_status = async (data) => {
+  const { status, invoiceLinkId } = data;
+  try {
+    const Invoice_Link = await linkInvoice.findOne({
+      _id: invoiceLinkId,
+    });
+    if (!Invoice_Link) {
+      return {
+        code: 1,
+        message: "invoiceLink.notFoundInvoiceLink",
+        data: null,
+      };
+    }
+    Invoice_Link.status = status;
+    Invoice_Link.save();
+
     return { code: 1, message: "commonSuccess.message", data: null };
   } catch (error) {
     console.log(error);

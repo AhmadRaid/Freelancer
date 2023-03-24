@@ -8,7 +8,7 @@ const linkInvoice = new mongoose.Schema({
     required: true,
   },
 
-  invoiceId:{
+  invoiceId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Invoice",
   },
@@ -58,21 +58,24 @@ const linkInvoice = new mongoose.Schema({
     },
   },
 
-  isDeleted: {
-    type: Boolean,
-    default: "false",
-  },
+  // isDeleted: {
+  //   type: Boolean,
+  //   default: "false",
+  // },
 });
 
 linkInvoice.post("save", async function (doc, next) {
   try {
     if (doc.status !== "pending verification") {
       await Request.create({
-        userId,
+        userId: doc.userId,
         requestType: "Create Invoice Link",
         linkInvoiceId: doc._id,
       });
     }
+
+    doc.link = `http://localhost:3000/api/${doc._id}`;
+    doc.save();
     next();
   } catch (err) {
     next(err);

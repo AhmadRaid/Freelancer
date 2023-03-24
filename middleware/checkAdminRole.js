@@ -4,7 +4,7 @@ const {
   Unauthorized,
 } = require("../utils/response/error/errors");
 async function checkAdminRole(req, res, next) {
-  let user = User.findOne({ _id: req.user._id });
+  let user = await User.findOne({ _id: req.user._id });
   if (!user) {
     return next(new Unauthorized("Sorry , This user not exist"));
   }

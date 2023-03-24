@@ -4,8 +4,6 @@ const controller = require("../../../app/controller/linkInvoice");
 
 const isAuth = require("../../../middleware/isAuth");
 
-const verifyIdentify = require("../../../middleware/verifyIdentify");
-
 const checkAdminRole = require("../../../middleware/checkAdminRole");
 
 const checkClientRole = require("../../../middleware/checkClientRole");
@@ -23,9 +21,9 @@ router.put("/edit/:invoiceLinkId", controller.editLinkInvoice);
 
 router.delete("/delete/:invoiceLinkId", controller.deleteLinkInvoice);
 
-router.put("/Admin_Team_change_status/:invoiceLinkId", checkAdminRole ,controller.change_status);
+router.put("/Admin_Team_change_status/:invoiceLinkId", checkAdminRole ,controller.Admin_change_status);
 
-router.put("/Client_change_status/:invoiceLinkId", checkClientRole , controller.payLinkInvoice);
+router.put("/Client_change_status/:invoiceLinkId", checkClientRole , controller.Client_change_status);
 
 router.post("/payLinkInvoice/:invoiceLinkId", controller.payLinkInvoice);
 

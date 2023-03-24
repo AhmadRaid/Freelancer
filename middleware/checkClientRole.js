@@ -6,15 +6,15 @@ const {
 async function checkClientRole(req, res, next) {
   let Link_Invoice = linkInvoice.findOne({ _id: req.user._id });
 
-  let invoice = Invoice.findOne({ _id: Link_Invoice.invoiceId });
+  //let invoice = Invoice.findOne({ _id: Link_Invoice.invoiceId });
 
   if (!Link_Invoice) {
     return next(new Unauthorized("Sorry , Link Invoice not exist"));
   }
 
-  if (!invoice) {
-    return next(new Unauthorized("Sorry , Invoice not exist"));
-  }
+  // if (!invoice) {
+  //   return next(new Unauthorized("Sorry , Invoice not exist"));
+  // }
 
   if (
     (Link_Invoice.status == "pending approval" ||
@@ -28,18 +28,18 @@ async function checkClientRole(req, res, next) {
     );
   }
 
-  if (
-    (Link_Invoice.status == "active" || Link_Invoice.status == "inactive") &&
-    req.body.status == "archived" &&
-    Link_Invoice.invoiceId !== null &&
-    (invoice.status !== "Canceled" || invoice.status !== "archived")
-  ) {
-    return next(
-      new AccessDenied(
-        "Sorry , From active or inactive to archived, in case there are invoices associated with the link and not cancelled or archived invoice"
-      )
-    );
-  }
+  // if (
+  //   (Link_Invoice.status == "active" || Link_Invoice.status == "inactive") &&
+  //   req.body.status == "archived" &&
+  //   Link_Invoice.invoiceId !== null &&
+  //   (invoice.status !== "Canceled" || invoice.status !== "archived")
+  // ) {
+  //   return next(
+  //     new AccessDenied(
+  //       "Sorry , From active or inactive to archived, in case there are invoices associated with the link and not cancelled or archived invoice"
+  //     )
+  //   );
+  // }
 }
 
 module.exports = checkClientRole;
