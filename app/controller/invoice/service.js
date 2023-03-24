@@ -60,7 +60,7 @@ module.exports.getDetails = async (invoiceId, freelancerId) => {
     throw new Error(error);
   }
 };
-module.exports.cancel = async (date, freelancerId) => {
+module.exports.delete = async (date, freelancerId) => {
   try {
     const {} = data;
   } catch (error) {
@@ -68,9 +68,38 @@ module.exports.cancel = async (date, freelancerId) => {
     throw new Error(error);
   }
 };
-module.exports.edit = async (data, freelancerId) => {
+module.exports.edit = async (data, invoiceId, freelancerId) => {
   try {
-    const {} = data;
+    const { fullName, email, currency, country } = data;
+    let { services } = data;
+    services = Array.isArray(services) ? services : [services];
+
+    const editableStatus = ['pending verification', 'pending approval', 'sent'];
+    const invoice = await Invoice.findOne({
+      freelancerId,
+      _id: invoiceId,
+      isDeleted: false,
+    });
+
+    if (!invoice) {
+      return { code: 1, message: "invoice doesn't exist", data: null };
+    }
+
+    if (!editableStatus.includes(invoice.status)) {
+      return { code: 1, message: 'invoice uneditable', data: invoice };
+    }
+
+    invoice.name = fullName;
+    invoice.email = email;
+    invoice.currency = currency;
+    invoice.country = country;
+    invoice.services = services;
+    await invoice.save();
+    return {
+      code: 0,
+      message: 'invoice updated/edited successfully',
+      data: invoice,
+    };
   } catch (error) {
     console.log(error);
     throw new Error(error);

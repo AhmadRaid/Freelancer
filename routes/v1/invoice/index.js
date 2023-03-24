@@ -14,6 +14,6 @@ router.post('/', controller.addInvoice);
 
 router.put('/:id', controller.edit);
 
-router.delete('/:id', controller.cancel);
+router.delete('/:id', controller.delete);
 
 module.exports = router;

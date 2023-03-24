@@ -52,7 +52,11 @@ module.exports.addInvoice = async (req, res, next) => {
 };
 module.exports.edit = async (req, res, next) => {
   try {
-    const { code, message, data } = await service.edit(req.body, req.user._id);
+    const { code, message, data } = await service.edit(
+      req.body,
+      req.params.id,
+      req.user._id
+    );
     if (code === 0) {
       return next(new Success(message, data));
     }
@@ -61,9 +65,9 @@ module.exports.edit = async (req, res, next) => {
     return next(new InternalServerError(error));
   }
 };
-module.exports.cancel = async (req, res, next) => {
+module.exports.delete = async (req, res, next) => {
   try {
-    const { code, message, data } = await service.cancel(
+    const { code, message, data } = await service.delete(
       req.params.id,
       req.user._id
     );
