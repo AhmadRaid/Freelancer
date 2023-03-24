@@ -2,7 +2,60 @@ const { Invoice, verification_user } = require('../../Model');
 
 module.exports.getListing = async (data, freelancerId) => {
   try {
-    const {} = data;
+    let { search, offset, limit, filters, sort } = data;
+    limit = limit ? parseInt(limit) : 10;
+    offset = offset ? parseInt(offset) : 0;
+    if (sort && sort[0] == '-') {
+      sort = { [sort.slice(1)]: -1 };
+    } else if (sort) {
+      sort = { [sort]: 1 };
+    } else sort = { createdAt: -1 };
+
+    const query = {
+      freelancerId,
+      isDeleted: false,
+    };
+    if (filters) {
+      query.status = { $in: Array.isArray(filters) ? filters : [filters] };
+    }
+    if (search) {
+      const regex = new RegExp(search, 'i');
+      query.$or = [
+        { name: regex },
+        { status: regex },
+        { amount: regex },
+        { 'services.title': regex },
+        { 'services.description': regex },
+      ];
+    }
+
+    const invoices = await Invoice.aggregate([
+      {
+        $match: {
+          ...query,
+        },
+      },
+      {
+        $project: {
+          name: 1,
+          createdAt: 1,
+          amount: 1,
+          status: 1,
+          services: {
+            title: 1,
+            description: 1,
+          },
+        },
+      },
+      { $sort: sort },
+      { $skip: offset },
+      { $limit: limit },
+    ]);
+    const count = await Invoice.aggregate([
+      { $match: { ...query } },
+      { $count: 'count' },
+    ]);
+    return { code: 0, message: 'get listings', data: { count, invoices } };
   } catch (error) {
     console.log(error);
     throw new Error(error);
@@ -25,6 +78,10 @@ module.exports.addInvoice = async (data, freelancerId) => {
     const message = userVerified.AcceptVerificationID
       ? 'invoice created and sent to team'
       : 'invoice created need to verify id to send to team';
+    let amount = 10;
+    services.map((service) => {
+      amount += service.price;
+    });
     const invoice = await Invoice.create({
       freelancerId,
       name: fullName,
@@ -33,6 +90,7 @@ module.exports.addInvoice = async (data, freelancerId) => {
       country,
       services,
       status,
+      amount,
     });
     return {
       code: 0,

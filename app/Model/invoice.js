@@ -28,7 +28,11 @@ const invoiceSchema = new mongoose.Schema(
         },
       },
     ],
-    fees: Number,
+    fees: {
+      type: Number,
+      default: 10,
+    },
+    amount: Number,
     paymentMethod: {
       enum: ['creditCard', 'paypal', 'applePay'],
     },
