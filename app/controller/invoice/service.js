@@ -55,6 +55,9 @@ module.exports.getListing = async (data, freelancerId) => {
       { $match: { ...query } },
       { $count: 'count' },
     ]);
+    if (!invoices) {
+      return { code: 0, message: 'no invoices', data: null };
+    }
     return { code: 0, message: 'get listings', data: { count, invoices } };
   } catch (error) {
     console.log(error);
