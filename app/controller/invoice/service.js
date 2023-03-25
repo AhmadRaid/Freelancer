@@ -179,6 +179,8 @@ module.exports.edit = async (data, invoiceId, freelancerId) => {
     invoice.currency = currency;
     invoice.country = country;
     invoice.services = services;
+    invoice.status =
+      invoice.status === 'sent' ? 'pending approval' : invoice.status;
     await invoice.save();
     return {
       code: 0,
