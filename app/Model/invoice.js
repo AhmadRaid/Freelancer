@@ -52,7 +52,9 @@ const invoiceSchema = new mongoose.Schema(
       ],
       default: 'pending approval',
     },
-
+    disapprovalReason: {
+      type: String,
+    },
     isDeleted: {
       type: Boolean,
       default: false,
