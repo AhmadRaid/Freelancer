@@ -1,4 +1,4 @@
-const { linkInvoice, verification_user, Request } = require('../../Model');
+const { linkInvoice, verification_user, Invoice } = require('../../Model');
 
 module.exports.getAllLinkInvoice = async (data, userId) => {
   try {
@@ -69,6 +69,11 @@ module.exports.addLinkInvoice = async (data) => {
       };
     }
 
+    let amount = 10;
+    jobDetails.map((Job_Details) => {
+      amount += parseFloat(Job_Details.price);
+    });
+
     if (verificationUser.AcceptVerificationID == false) {
       status = 'pending verification';
     }
@@ -79,6 +84,7 @@ module.exports.addLinkInvoice = async (data) => {
       jobDetails,
       status,
       link,
+      TotalPrice : parseFloat(amount)
     });
 
     return {
@@ -175,10 +181,14 @@ module.exports.payLinkInvoice = async (data) => {
     }
 
     if (invoiceLink.status == 'active') {
+
       const invoice = await Invoice.create({
-        freelancerId: userId,
-        invoiceLinkId,
+       Currency  : linkInvoice.Currency,
+       services : linkInvoice.jobDetails,
       });
+
+      invoiceLink.invoiceId = invoiceLink.invoiceId.push(invoice._id)
+      await invoiceLink.save()
       return { code: 0, message: 'commonSuccess.message', data: invoice };
     }
     return { code: 1, message: 'commonSuccess.message', data: null };

@@ -8,10 +8,10 @@ const linkInvoice = new mongoose.Schema({
     required: true,
   },
 
-  invoiceId: {
+  invoiceId: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: "Invoice",
-  },
+  }],
 
   Currency: {
     type: String,
@@ -23,10 +23,10 @@ const linkInvoice = new mongoose.Schema({
       title: {
         type: String,
       },
-      Amount: {
+      price: {
         type: Number,
       },
-      Description: {
+      description: {
         type: String,
         required: true,
       },
@@ -51,6 +51,14 @@ const linkInvoice = new mongoose.Schema({
     required: true,
   },
 
+  fees:{
+    type: Number,
+    default : 10
+  },
+
+  TotalPrice:{
+    type: Number,
+  },
   disapprovalReason: {
     type: String,
     required: function () {

@@ -1,11 +1,12 @@
-const { Invoice, verification_user } = require('../../Model');
+const { Invoice, verification_user } = require("../../Model");
+const { getAllLinkInvoice } = require("../linkInvoice/linkInvoiceController");
 
-module.exports.getListing = async (data, freelancerId) => {
+async function getListing (data, freelancerId)  {
   try {
     let { search, offset, limit, filters, sort } = data;
     limit = limit ? parseInt(limit) : 10;
     offset = offset ? parseInt(offset) : 0;
-    if (sort && sort[0] == '-') {
+    if (sort && sort[0] == "-") {
       sort = { [sort.slice(1)]: -1 };
     } else if (sort) {
       sort = { [sort]: 1 };
@@ -19,13 +20,13 @@ module.exports.getListing = async (data, freelancerId) => {
       query.status = { $in: Array.isArray(filters) ? filters : [filters] };
     }
     if (search) {
-      const regex = new RegExp(search, 'i');
+      const regex = new RegExp(search, "i");
       query.$or = [
         { name: regex },
         { status: regex },
         { amount: regex },
-        { 'services.title': regex },
-        { 'services.description': regex },
+        { "services.title": regex },
+        { "services.description": regex },
       ];
     }
 
@@ -53,17 +54,40 @@ module.exports.getListing = async (data, freelancerId) => {
     ]);
     const count = await Invoice.aggregate([
       { $match: { ...query } },
-      { $count: 'count' },
+      { $count: "count" },
     ]);
     if (!invoices) {
-      return { code: 0, message: 'no invoices', data: null };
+      return { code: 0, message: "no invoices", data: null };
     }
-    return { code: 0, message: 'get listings', data: { count, invoices } };
+    return { code: 0, message: "get listings", data: { count, invoices } };
   } catch (error) {
     console.log(error);
     throw new Error(error);
   }
 };
+module.exports.getListing = getListing;
+module.exports.getAllInvoiceLinkInvoice = async (data, freelancerId) => {
+  try {
+    const {data :dataInvoices} = await getListing(data, freelancerId);
+    const {data :dataLinks} = await getAllLinkInvoice(data, freelancerId);
+
+    return {
+      code: 0,
+      message: "all",
+      data: {
+        invoicesAndLinks: {
+          dataInvoices,
+          dataLinks
+          
+        },
+      },
+    };
+  } catch (error) {
+    console.log(error);
+    throw new Error(error);
+  }
+};
+
 module.exports.addInvoice = async (data, freelancerId) => {
   try {
     const { fullName, email, currency, country } = data;
@@ -76,11 +100,11 @@ module.exports.addInvoice = async (data, freelancerId) => {
     });
 
     const status = userVerified.AcceptVerificationID
-      ? 'pending approval'
-      : 'pending verification';
+      ? "pending approval"
+      : "pending verification";
     const message = userVerified.AcceptVerificationID
-      ? 'invoice created and sent to team'
-      : 'invoice created need to verify id to send to team';
+      ? "invoice created and sent to team"
+      : "invoice created need to verify id to send to team";
     let amount = 10;
     services.map((service) => {
       amount += service.price;
@@ -115,7 +139,7 @@ module.exports.getDetails = async (invoiceId, freelancerId) => {
     if (!invoice) {
       return { code: 1, message: "invoice doesn't exist", data: null };
     }
-    return { code: 0, message: 'invoice details', data: invoice };
+    return { code: 0, message: "invoice details", data: invoice };
   } catch (error) {
     console.log(error);
     throw new Error(error);
@@ -124,9 +148,9 @@ module.exports.getDetails = async (invoiceId, freelancerId) => {
 module.exports.delete = async (invoiceId, freelancerId) => {
   try {
     const cancelableStatus = [
-      'pending verification',
-      'pending approval',
-      'sent',
+      "pending verification",
+      "pending approval",
+      "sent",
     ];
 
     const invoice = await Invoice.findOne({
@@ -139,16 +163,16 @@ module.exports.delete = async (invoiceId, freelancerId) => {
       return { code: 1, message: "invoice doesn't exist", data: null };
     }
 
-    if (invoice.status === 'canceled') {
-      invoice.status = 'archived';
+    if (invoice.status === "canceled") {
+      invoice.status = "archived";
       invoice.isDeleted = true;
       await invoice.save();
-      return { code: 0, message: 'invoice deleted', data: null };
+      return { code: 0, message: "invoice deleted", data: null };
     }
     if (cancelableStatus.includes(invoice.status)) {
-      invoice.status = 'canceled';
+      invoice.status = "canceled";
       await invoice.save();
-      return { code: 0, message: 'invoice canceled', data: null };
+      return { code: 0, message: "invoice canceled", data: null };
     }
     return { code: 2, message: "invoice can't be canceled or deleted" };
   } catch (error) {
@@ -162,7 +186,7 @@ module.exports.edit = async (data, invoiceId, freelancerId) => {
     let { services } = data;
     services = Array.isArray(services) ? services : [services];
 
-    const editableStatus = ['pending verification', 'pending approval', 'sent'];
+    const editableStatus = ["pending verification", "pending approval", "sent"];
     const invoice = await Invoice.findOne({
       freelancerId,
       _id: invoiceId,
@@ -174,7 +198,7 @@ module.exports.edit = async (data, invoiceId, freelancerId) => {
     }
 
     if (!editableStatus.includes(invoice.status)) {
-      return { code: 1, message: 'invoice uneditable', data: invoice };
+      return { code: 1, message: "invoice uneditable", data: invoice };
     }
 
     invoice.name = fullName;
@@ -183,11 +207,11 @@ module.exports.edit = async (data, invoiceId, freelancerId) => {
     invoice.country = country;
     invoice.services = services;
     invoice.status =
-      invoice.status === 'sent' ? 'pending approval' : invoice.status;
+      invoice.status === "sent" ? "pending approval" : invoice.status;
     await invoice.save();
     return {
       code: 0,
-      message: 'invoice updated/edited successfully',
+      message: "invoice updated/edited successfully",
       data: invoice,
     };
   } catch (error) {

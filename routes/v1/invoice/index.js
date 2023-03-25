@@ -8,6 +8,8 @@ router.use(isAuth);
 
 router.get('/', controller.getListing);
 
+router.get('/getAllInvoiceLinkInvoice', controller.getAllInvoiceLinkInvoice);
+
 router.get('/:id', controller.getDetails);
 // TODO: add validation for what's coming in
 router.post('/', controller.addInvoice);

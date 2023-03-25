@@ -8,6 +8,23 @@ const {
 } = require('../../../utils/response/success/successes');
 const service = require('./service');
 
+
+module.exports.getAllInvoiceLinkInvoice = async (req, res, next) => {
+  try {
+    const { code, message, data } = await service.getAllInvoiceLinkInvoice(
+      req.query,
+      req.user._id
+    );
+    if (code === 0) {
+      return next(new Success(message, data));
+    }
+    return next(new BadRequest(message));
+  } catch (error) {
+    return next(new InternalServerError(error));
+  }
+};
+
+
 module.exports.getListing = async (req, res, next) => {
   try {
     const { code, message, data } = await service.getListing(
