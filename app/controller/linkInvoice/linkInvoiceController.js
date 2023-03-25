@@ -1,4 +1,4 @@
-const { linkInvoice, verification_user, Invoice } = require('../../Model');
+const { linkInvoice, verification_user, Invoice } = require("../../Model");
 
 module.exports.getAllLinkInvoice = async (data, userId) => {
   try {
@@ -6,24 +6,24 @@ module.exports.getAllLinkInvoice = async (data, userId) => {
 
     limit = limit ? parseInt(limit) : 10;
     offset = offset ? parseInt(offset) : 0;
-    if (sort && sort[0] == '-') {
+    if (sort && sort[0] == "-") {
       sort = { [sort.slice(1)]: -1 };
     } else if (sort) {
       sort = { [sort]: 1 };
     } else sort = { createdAt: -1 };
 
-    const query = { userId, status: { $ne: 'archived' } };
+    const query = { userId, status: { $ne: "archived" } };
 
     if (filters) {
       query.status = { $in: Array.isArray(filters) ? filters : [filters] };
     }
     if (search) {
-      const regex = new RegExp(search, 'i');
+      const regex = new RegExp(search, "i");
       query.$or = [
         { status: regex },
         { amount: regex },
-        { 'jobDetails.title': regex },
-        { 'jobDetails.Description': regex },
+        { "jobDetails.title": regex },
+        { "jobDetails.Description": regex },
       ];
     }
 
@@ -39,14 +39,14 @@ module.exports.getAllLinkInvoice = async (data, userId) => {
     ]);
     const count = await linkInvoice.aggregate([
       { $match: { ...query } },
-      { $count: 'count' },
+      { $count: "count" },
     ]);
     if (!Link_Invoice) {
-      return { code: 1, message: 'We dont have Link Invoice', data: null };
+      return { code: 1, message: "We dont have Link Invoice", data: null };
     }
     return {
       code: 0,
-      message: 'commonSuccess.message',
+      message: "commonSuccess.message",
       data: { count, Link_Invoice },
     };
   } catch (error) {
@@ -64,7 +64,7 @@ module.exports.addLinkInvoice = async (data) => {
     if (!verificationUser) {
       return {
         code: 1,
-        message: 'verificationUser.not found',
+        message: "verificationUser.not found",
         data: { Link_Invoice },
       };
     }
@@ -75,7 +75,7 @@ module.exports.addLinkInvoice = async (data) => {
     });
 
     if (verificationUser.AcceptVerificationID == false) {
-      status = 'pending verification';
+      status = "pending verification";
     }
 
     const Link_Invoice = await linkInvoice.create({
@@ -84,12 +84,12 @@ module.exports.addLinkInvoice = async (data) => {
       jobDetails,
       status,
       link,
-      TotalPrice : parseFloat(amount)
+      TotalPrice: parseFloat(amount),
     });
 
     return {
       code: 0,
-      message: 'commonSuccess.message',
+      message: "commonSuccess.message",
       data: { Link_Invoice },
     };
   } catch (error) {
@@ -108,14 +108,14 @@ module.exports.editLinkInvoice = async (data) => {
     });
 
     if (!Invoice_Link) {
-      return { code: 1, message: 'category.notFoundBank', data: null };
+      return { code: 1, message: "category.notFoundBank", data: null };
     }
 
-    if (Invoice_Link.status == 'archived') {
+    if (Invoice_Link.status == "archived") {
       return {
         code: 1,
         message:
-          'You cant change  because this invoice link status is archived',
+          "You cant change  because this invoice link status is archived",
         data: null,
       };
     }
@@ -126,7 +126,7 @@ module.exports.editLinkInvoice = async (data) => {
 
     await Invoice_Link.save();
 
-    return { code: 0, message: 'commonSuccess.message', data: bank };
+    return { code: 0, message: "commonSuccess.message", data: bank };
   } catch (error) {
     console.log(error);
     throw new Error(error);
@@ -143,12 +143,12 @@ module.exports.deleteLinkInvoice = async (data) => {
     if (!Invoice_Link) {
       return {
         code: 1,
-        message: 'invoiceLink.notFoundInvoiceLink',
+        message: "invoiceLink.notFoundInvoiceLink",
         data: null,
       };
     }
 
-    Invoice_Link.status = 'archived';
+    Invoice_Link.status = "archived";
 
     if (disapprovalReason) {
       Invoice_Link.disapprovalReason = disapprovalReason;
@@ -157,7 +157,7 @@ module.exports.deleteLinkInvoice = async (data) => {
 
     return {
       code: 0,
-      message: 'commonSuccess.message',
+      message: "commonSuccess.message",
       data: { Invoice_Link },
     };
   } catch (error) {
@@ -169,29 +169,32 @@ module.exports.deleteLinkInvoice = async (data) => {
 module.exports.payLinkInvoice = async (data) => {
   const { invoiceLinkId, userId } = data;
   try {
-    const invoiceLink = await linkInvoice.findOne({
+    const Invoice_Link = await linkInvoice.findOne({
       _id: invoiceLinkId,
     });
-    if (!invoiceLink) {
+
+    if (!Invoice_Link) {
       return {
         code: 1,
-        message: 'invoiceLink.notFoundInvoiceLink',
+        message: "invoiceLink.notFoundInvoiceLink",
         data: null,
       };
     }
 
-    if (invoiceLink.status == 'active') {
-
+    if (Invoice_Link.status == "active") {
       const invoice = await Invoice.create({
-       Currency  : linkInvoice.Currency,
-       services : linkInvoice.jobDetails,
+        Currency: linkInvoice.Currency,
+        services: linkInvoice.jobDetails,
       });
 
-      invoiceLink.invoiceId = invoiceLink.invoiceId.push(invoice._id)
-      await invoiceLink.save()
-      return { code: 0, message: 'commonSuccess.message', data: invoice };
+     // Invoice_Link.invoiceId = Invoice_Link.invoiceId.push(invoice._id);
+
+      //await Invoice_Link.save();
+
+      return { code: 0, message: "commonSuccess.message", data: invoice };
     }
-    return { code: 1, message: 'commonSuccess.message', data: null };
+
+    return { code: 1, message: "something error in invoice link", data: null };
   } catch (error) {
     console.log(error);
     throw new Error(error);
@@ -209,12 +212,17 @@ module.exports.Admin_change_status = async (data) => {
     if (!Invoice_Link) {
       return {
         code: 1,
-        message: 'invoiceLink.notFoundInvoiceLink',
+        message: "invoiceLink.notFoundInvoiceLink",
         data: null,
       };
     }
 
     Invoice_Link.status = status;
+
+    Invoice_Link.historyStatus = Invoice_Link.historyStatus.push({
+      status,
+      Date: new Date(),
+    });
 
     if (disapprovalReason) {
       Invoice_Link.disapprovalReason = disapprovalReason;
@@ -223,7 +231,7 @@ module.exports.Admin_change_status = async (data) => {
 
     return {
       code: 0,
-      message: 'commonSuccess.message',
+      message: "commonSuccess.message",
       data: { Invoice_Link },
     };
   } catch (error) {
@@ -241,14 +249,20 @@ module.exports.Client_change_status = async (data) => {
     if (!Invoice_Link) {
       return {
         code: 1,
-        message: 'invoiceLink.notFoundInvoiceLink',
+        message: "invoiceLink.notFoundInvoiceLink",
         data: null,
       };
     }
     Invoice_Link.status = status;
+
+    Invoice_Link.historyStatus = Invoice_Link.historyStatus.push({
+      status,
+      Date: new Date(),
+    });
+
     Invoice_Link.save();
 
-    return { code: 1, message: 'commonSuccess.message', data: null };
+    return { code: 1, message: "commonSuccess.message", data: null };
   } catch (error) {
     console.log(error);
     throw new Error(error);

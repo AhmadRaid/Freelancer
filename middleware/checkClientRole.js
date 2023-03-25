@@ -11,7 +11,7 @@ async function checkClientRole(req, res, next) {
   if (!Link_Invoice) {
     return next(new Unauthorized("Sorry , Link Invoice not exist"));
   }
-  
+
   if (!invoice) {
     return next(new Unauthorized("Sorry , Invoice not exist"));
   }
@@ -23,7 +23,7 @@ async function checkClientRole(req, res, next) {
   ) {
     return next(
       new AccessDenied(
-        "Sorry , You cant change the status form pending approval or pending verification to active"
+        "Sorry , You can’t change the status form pending approval or pending verification to active"
       )
     );
   }

@@ -28,6 +28,7 @@ const invoiceSchema = new mongoose.Schema(
         },
       },
     ],
+    
     fees: {
       type: Number,
       default: 10,

@@ -66,11 +66,19 @@ const linkInvoice = new mongoose.Schema({
     },
   },
 
+  historyStatus: {
+    type: Array,
+    status: { type: String },
+    Date: { type: Date },
+  },
+
   // isDeleted: {
   //   type: Boolean,
   //   default: "false",
   // },
-});
+},
+{timestamps : true}
+);
 
 linkInvoice.post("save", async function (doc, next) {
   try {

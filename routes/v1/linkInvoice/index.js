@@ -25,7 +25,7 @@ router.put("/Admin_Team_change_status/:invoiceLinkId", checkAdminRole ,controlle
 
 router.put("/Client_change_status/:invoiceLinkId", checkClientRole , controller.Client_change_status);
 
-router.post("/payLinkInvoice/:invoiceLinkId", controller.payLinkInvoice);
+router.put("/payLinkInvoice/:invoiceLinkId", controller.payLinkInvoice);
 
 
 

@@ -109,6 +109,7 @@ module.exports.payLinkInvoice = async (req, res, next) => {
     const { message, data, code } = await InvoiceLinkController.payLinkInvoice({
       ...req.user._id,
       ...req.params,
+      ...req.body
     });
 
     if (code === 0) {
