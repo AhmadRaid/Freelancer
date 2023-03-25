@@ -1,17 +1,17 @@
-const express = require("express");
+const express = require('express');
 
-const controller = require("../../../app/controller/bank");
-const isAuth = require("../../../middleware/isAuth");
+const controller = require('../../../app/controller/Bank');
+const isAuth = require('../../../middleware/isAuth');
 
 const router = express.Router();
 router.use(isAuth);
 
-router.get("/listing", controller.getAllBank);
+router.get('/listing', controller.getAllBank);
 
-router.post("/add", controller.addBank);
+router.post('/add', controller.addBank);
 
-router.put("/edit/:bankId", controller.editBank);
+router.put('/edit/:bankId', controller.editBank);
 
-router.delete("/delete/:bankId", controller.deleteBank);
+router.delete('/delete/:bankId', controller.deleteBank);
 
 module.exports = router;

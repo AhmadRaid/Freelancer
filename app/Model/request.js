@@ -1,18 +1,22 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
 const requestSchema = new mongoose.Schema(
   {
     withdrawId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "withdraw",
+      ref: 'withdraw',
     },
     linkInvoiceId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "linkInvoice",
+      ref: 'linkInvoice',
+    },
+    invoiceId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'invoice',
     },
     userId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: 'User',
       required: true,
     },
     requestType: {
@@ -27,5 +31,5 @@ const requestSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
-const request = mongoose.model("Request", requestSchema);
+const request = mongoose.model('Request', requestSchema);
 module.exports = request;
