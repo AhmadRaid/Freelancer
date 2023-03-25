@@ -1,18 +1,53 @@
-const { linkInvoice, verification_user, Request } = require("../../Model");
+const { linkInvoice, verification_user, Request } = require('../../Model');
 
-module.exports.getAllLinkInvoice = async (userId) => {
+module.exports.getAllLinkInvoice = async (data, userId) => {
   try {
-    let Link_Invoice = await linkInvoice.find({
-      status: { $ne: "archived" },
-      userId,
-    });
+    let { search, offset, limit, filters, sort } = data;
+
+    limit = limit ? parseInt(limit) : 10;
+    offset = offset ? parseInt(offset) : 0;
+    if (sort && sort[0] == '-') {
+      sort = { [sort.slice(1)]: -1 };
+    } else if (sort) {
+      sort = { [sort]: 1 };
+    } else sort = { createdAt: -1 };
+
+    const query = { userId, status: { $ne: 'archived' } };
+
+    if (filters) {
+      query.status = { $in: Array.isArray(filters) ? filters : [filters] };
+    }
+    if (search) {
+      const regex = new RegExp(search, 'i');
+      query.$or = [
+        { status: regex },
+        { amount: regex },
+        { 'jobDetails.title': regex },
+        { 'jobDetails.Description': regex },
+      ];
+    }
+
+    const Link_Invoice = await linkInvoice.aggregate([
+      {
+        $match: {
+          ...query,
+        },
+      },
+      { $sort: sort },
+      { $skip: offset },
+      { $limit: limit },
+    ]);
+    const count = await linkInvoice.aggregate([
+      { $match: { ...query } },
+      { $count: 'count' },
+    ]);
     if (!Link_Invoice) {
-      return { code: 1, message: "We dont have Link Invoice", data: null };
+      return { code: 1, message: 'We dont have Link Invoice', data: null };
     }
     return {
       code: 0,
-      message: "commonSuccess.message",
-      data: { Link_Invoice },
+      message: 'commonSuccess.message',
+      data: { count, Link_Invoice },
     };
   } catch (error) {
     console.log(error);
@@ -29,13 +64,13 @@ module.exports.addLinkInvoice = async (data) => {
     if (!verificationUser) {
       return {
         code: 1,
-        message: "verificationUser.not found",
+        message: 'verificationUser.not found',
         data: { Link_Invoice },
       };
     }
 
     if (verificationUser.AcceptVerificationID == false) {
-      status = "pending verification";
+      status = 'pending verification';
     }
 
     const Link_Invoice = await linkInvoice.create({
@@ -48,7 +83,7 @@ module.exports.addLinkInvoice = async (data) => {
 
     return {
       code: 0,
-      message: "commonSuccess.message",
+      message: 'commonSuccess.message',
       data: { Link_Invoice },
     };
   } catch (error) {
@@ -67,14 +102,14 @@ module.exports.editLinkInvoice = async (data) => {
     });
 
     if (!Invoice_Link) {
-      return { code: 1, message: "category.notFoundBank", data: null };
+      return { code: 1, message: 'category.notFoundBank', data: null };
     }
 
-    if (Invoice_Link.status == "archived") {
+    if (Invoice_Link.status == 'archived') {
       return {
         code: 1,
         message:
-          "You cant change  because this invoice link status is archived",
+          'You cant change  because this invoice link status is archived',
         data: null,
       };
     }
@@ -85,7 +120,7 @@ module.exports.editLinkInvoice = async (data) => {
 
     await Invoice_Link.save();
 
-    return { code: 0, message: "commonSuccess.message", data: bank };
+    return { code: 0, message: 'commonSuccess.message', data: bank };
   } catch (error) {
     console.log(error);
     throw new Error(error);
@@ -102,12 +137,12 @@ module.exports.deleteLinkInvoice = async (data) => {
     if (!Invoice_Link) {
       return {
         code: 1,
-        message: "invoiceLink.notFoundInvoiceLink",
+        message: 'invoiceLink.notFoundInvoiceLink',
         data: null,
       };
     }
 
-    Invoice_Link.status = "archived";
+    Invoice_Link.status = 'archived';
 
     if (disapprovalReason) {
       Invoice_Link.disapprovalReason = disapprovalReason;
@@ -116,7 +151,7 @@ module.exports.deleteLinkInvoice = async (data) => {
 
     return {
       code: 0,
-      message: "commonSuccess.message",
+      message: 'commonSuccess.message',
       data: { Invoice_Link },
     };
   } catch (error) {
@@ -134,19 +169,19 @@ module.exports.payLinkInvoice = async (data) => {
     if (!invoiceLink) {
       return {
         code: 1,
-        message: "invoiceLink.notFoundInvoiceLink",
+        message: 'invoiceLink.notFoundInvoiceLink',
         data: null,
       };
     }
 
-    if (invoiceLink.status == "active") {
+    if (invoiceLink.status == 'active') {
       const invoice = await Invoice.create({
         freelancerId: userId,
         invoiceLinkId,
       });
-      return { code: 0, message: "commonSuccess.message", data: invoice };
+      return { code: 0, message: 'commonSuccess.message', data: invoice };
     }
-    return { code: 1, message: "commonSuccess.message", data: null };
+    return { code: 1, message: 'commonSuccess.message', data: null };
   } catch (error) {
     console.log(error);
     throw new Error(error);
@@ -164,7 +199,7 @@ module.exports.Admin_change_status = async (data) => {
     if (!Invoice_Link) {
       return {
         code: 1,
-        message: "invoiceLink.notFoundInvoiceLink",
+        message: 'invoiceLink.notFoundInvoiceLink',
         data: null,
       };
     }
@@ -178,7 +213,7 @@ module.exports.Admin_change_status = async (data) => {
 
     return {
       code: 0,
-      message: "commonSuccess.message",
+      message: 'commonSuccess.message',
       data: { Invoice_Link },
     };
   } catch (error) {
@@ -196,14 +231,14 @@ module.exports.Client_change_status = async (data) => {
     if (!Invoice_Link) {
       return {
         code: 1,
-        message: "invoiceLink.notFoundInvoiceLink",
+        message: 'invoiceLink.notFoundInvoiceLink',
         data: null,
       };
     }
     Invoice_Link.status = status;
     Invoice_Link.save();
 
-    return { code: 1, message: "commonSuccess.message", data: null };
+    return { code: 1, message: 'commonSuccess.message', data: null };
   } catch (error) {
     console.log(error);
     throw new Error(error);
