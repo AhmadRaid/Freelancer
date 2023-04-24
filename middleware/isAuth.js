@@ -1,6 +1,4 @@
-const {
-  Unauthorized,
-} = require("../utils/response/error/errors");
+const { Unauthorized } = require("../utils/response/error/errors");
 const { verifyAccessToken } = require("../utils/jwt");
 const { User } = require("../app/Model");
 async function isAuth(req, res, next) {
@@ -23,6 +21,8 @@ async function isAuth(req, res, next) {
     if (!decodedToken) {
       return next(new Unauthorized("Unauthorized"));
     }
+    console.log(decodedToken);
+
     const user = await User.findOne({ _id: decodedToken.data.id });
     if (!user) {
       return next(new Unauthorized("Unauthorized"));

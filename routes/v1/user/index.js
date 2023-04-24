@@ -18,15 +18,15 @@ const storage = multer.diskStorage({
 
 const router = express.Router();
 
-router.get("/listing", controller.getAllUser);
+// router.get("/listing", controller.getAllUser);
 
-router.post("/add", controller.addUser);
-router.put("/edit/:userId", controller.editUser);
-router.get("/details/:userId");
-router.delete("/delete/:userId", controller.deleteUser);
+// router.post("/add", controller.addUser);
+// router.put("/edit/:userId", controller.editUser);
+// router.get("/details/:userId");
+// router.delete("/delete/:userId", controller.deleteUser);
 
-router.post("/verifyAddress",isAuth, upload.single('fileUploaded') , controller.verifyAddress);
+// router.post("/verifyAddress",isAuth, upload.single('fileUploaded') , controller.verifyAddress);
 
-router.post("/givePermissionCache" , controller.givePermissionCache);
+// router.post("/givePermissionCache" , controller.givePermissionCache);
 
 module.exports = router;

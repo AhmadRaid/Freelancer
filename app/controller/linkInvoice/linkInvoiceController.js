@@ -182,14 +182,16 @@ module.exports.payLinkInvoice = async (data) => {
     }
 
     if (Invoice_Link.status == "active") {
+      
       const invoice = await Invoice.create({
+        freelancerId : userId,
         Currency: linkInvoice.Currency,
         services: linkInvoice.jobDetails,
       });
 
-     // Invoice_Link.invoiceId = Invoice_Link.invoiceId.push(invoice._id);
+     Invoice_Link.invoiceId = Invoice_Link.invoiceId.push(invoice._id);
 
-      //await Invoice_Link.save();
+      await Invoice_Link.save();
 
       return { code: 0, message: "commonSuccess.message", data: invoice };
     }

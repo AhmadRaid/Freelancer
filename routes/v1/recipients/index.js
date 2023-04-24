@@ -10,9 +10,9 @@ router.get("/listing", controller.getAllRecipient);
 
 router.post("/add", controller.addRecipient);
 
-router.put("/edit/:recipientId", controller.editRecipient);
+//router.put("/edit/:recipientId", controller.editRecipient);
 
-router.delete("/delete/:recipientId", controller.deleteRecipient);
+//router.delete("/delete/:recipientId", controller.deleteRecipient);
 
 router.post("/sendCode", controller.sendCode);
 

@@ -10,6 +10,8 @@ const service = require('./service');
 
 
 module.exports.getAllInvoiceLinkInvoice = async (req, res, next) => {
+
+  
   try {
     const { code, message, data } = await service.getAllInvoiceLinkInvoice(
       req.query,

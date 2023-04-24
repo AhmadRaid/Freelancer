@@ -6,12 +6,14 @@ const isAuth = require('../../../middleware/isAuth');
 const router = express.Router();
 router.use(isAuth);
 
-router.get('/listing', controller.getAllBank);
+ router.get('/listing', controller.getAllBank);
 
-router.post('/add', controller.addBank);
+ router.post('/add', controller.addBank);
 
-router.put('/edit/:bankId', controller.editBank);
+// router.get('/show/:bankId', controller.showBank);
 
-router.delete('/delete/:bankId', controller.deleteBank);
+// router.put('/edit/:bankId', controller.editBank);
+
+// router.delete('/delete/:bankId', controller.deleteBank);
 
 module.exports = router;
